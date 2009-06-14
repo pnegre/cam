@@ -30,7 +30,7 @@ void prep_capture()
 	
 	vmap.width = CAPTURE_IMAGE_WIDTH;
     vmap.height = CAPTURE_IMAGE_HEIGHT;
-    vmap.format = VIDEO_PALETTE_RGB24;
+    vmap.format = VIDEO_PALETTE_YUV420P;
 	
 	if (CaptureV4LDoubleBufferingInitCapture(fd, &vmap) == -1)
 		printf("WAARNNNNNNNNNING\n");
@@ -46,19 +46,34 @@ void pixel(SDL_Surface *s, int x, int y, int r, int g, int b)
 }
 
 
+void yuv_to_rgb(int y, int u, int v, int *r, int *g, int *b)
+{
+	static float R,G,B;
+	B = 1.164*(y - 16)                   + 2.018*(u - 128);
+	G = 1.164*(y - 16) - 0.813*(v - 128) - 0.391*(u - 128);
+	R = 1.164*(y - 16) + 1.596*(v - 128);
+	*r = (int) R;
+	*g = (int) G;
+	*b = (int) B;
+}
+
+
 void show_image(SDL_Surface *s)
 {
 	int x;
 	int y;
 	unsigned char *buf;
+	static int r,g,b;
 	
 	CaptureV4LDoubleBufferingCaptureWait(fd, &vmap);
 	buf = CaptureV4LGetImage(vmap,vm);
+// 	buf += 640*480;
 	
 	for(y=0;y<480;y++)
 		for(x=0;x<640;x++)
 		{
-			pixel(s,x,y,*buf, *(buf), *(buf));
+			yuv_to_rgb( *buf, 20, 60, &r, &g, &b);
+			pixel(s, x,y, r,g,b);
 			buf += 1;
 		}
 	
