@@ -12,7 +12,7 @@ protected:
 
 public:
 	
-	VideoDevice();
+	VideoDevice(int width, int height);
 	unsigned char *capture();
 	void prepareCapture();
 	void YUVtoBGR(unsigned char *dst);

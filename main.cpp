@@ -2,8 +2,11 @@
 
 #include "videodevice.h"
 
+#define SC_W 640
+#define SC_H 480
 
-VideoDevice vdev;
+
+VideoDevice vdev(SC_W,SC_H);
 
 
 
@@ -24,10 +27,10 @@ int main ( void )
 	Uint32 black_color;
 	
 	SDL_Init(SDL_INIT_VIDEO);
-	s = SDL_SetVideoMode(CAPTURE_IMAGE_WIDTH,CAPTURE_IMAGE_HEIGHT,0,SDL_HWSURFACE);
+	s = SDL_SetVideoMode(SC_W,SC_H,0,SDL_HWSURFACE);
 	black_color = SDL_MapRGB(s->format,0,0,0);
 	
-	fr = SDL_CreateRGBSurface(SDL_HWSURFACE, CAPTURE_IMAGE_WIDTH,CAPTURE_IMAGE_HEIGHT, 24,0,0,0,0);
+	fr = SDL_CreateRGBSurface(SDL_HWSURFACE, SC_W,SC_H, 24,0,0,0,0);
 	
 	while(1)
 	{

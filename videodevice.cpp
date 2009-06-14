@@ -1,7 +1,7 @@
 #include "videodevice.h"
 
 
-VideoDevice::VideoDevice()
+VideoDevice::VideoDevice(int width, int height)
 {
 	struct video_capability vcap;
 	struct video_picture vp;
@@ -23,8 +23,8 @@ VideoDevice::VideoDevice()
 	
 	CaptureV4LMemoryMapping( fd , vm );
 	
-	vmap.width = CAPTURE_IMAGE_WIDTH;
-	vmap.height = CAPTURE_IMAGE_HEIGHT;
+	vmap.width = width;
+	vmap.height = height;
 	vmap.format = VIDEO_PALETTE_YUV420P;
 	
 	if (CaptureV4LDoubleBufferingInitCapture(fd, &vmap) == -1)
@@ -68,13 +68,15 @@ void VideoDevice::YUVtoBGR(unsigned char *dst)
 	int x,y;
 	unsigned char *buf, *uu, *vv;
 	static int r,g,b;
+	int w = vmap.width;
+	int h = vmap.height;
 	
 	buf = CaptureV4LGetImage(vmap,vm);
-	uu = buf + CAPTURE_IMAGE_WIDTH*CAPTURE_IMAGE_HEIGHT;
-	vv = uu + 320*240;
+	uu = buf + h*w;
+	vv = uu + h*w/4;
 	
-	for(y=0;y<CAPTURE_IMAGE_HEIGHT;y++)
-		for(x=0;x<CAPTURE_IMAGE_WIDTH;x++)
+	for(y=0;y<h;y++)
+		for(x=0;x<w;x++)
 		{
 			yuv_to_rgb( *buf, uu[x/2 + (y/2)*320], vv[x/2 + (y/2)*320], &r, &g, &b);
 			*dst++ = b;
