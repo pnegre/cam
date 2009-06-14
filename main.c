@@ -36,6 +36,16 @@ void prep_capture()
 		printf("WAARNNNNNNNNNING\n");
 }
 
+
+void pixel(SDL_Surface *s, int x, int y, int r, int g, int b)
+{
+	Uint32 *m;
+	y *= s->w;
+	m = (Uint32*) s->pixels + y + x;
+	*m = SDL_MapRGB(s->format,r,g,b);
+}
+
+
 void show_image(SDL_Surface *s)
 {
 	int x;
@@ -45,10 +55,10 @@ void show_image(SDL_Surface *s)
 	CaptureV4LDoubleBufferingCaptureWait(fd, &vmap);
 	buf = CaptureV4LSetImage(vmap,vm);
 	
-	for(y=0;y<2;y++)
+	for(y=0;y<100;y++)
 		for(x=0;x<640;x++)
 		{
-			printf("(%d, %d, %d)", *buf, *(buf+1), *(buf+2));
+			pixel(s,x,y,*buf, *(buf+1), *(buf+2));
 			buf += 3;
 		}
 	
