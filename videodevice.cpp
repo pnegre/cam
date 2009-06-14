@@ -26,10 +26,14 @@ VideoDevice::VideoDevice(int width, int height)
 		printf("WAARNNNNNNNNNING\n");
 }
 
-// Torna els píxels en RAW (en el format que la càmera té configurat)
-unsigned char *VideoDevice::capture()
+void VideoDevice::capture()
 {
 	CaptureV4LDoubleBufferingCaptureWait(fd, &vmap);
+}
+
+// Torna els píxels en RAW (en el format que la càmera té configurat)
+unsigned char *VideoDevice::raw()
+{
 	return CaptureV4LGetImage(vmap,vm);
 }
 	
