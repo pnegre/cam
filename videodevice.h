@@ -15,5 +15,6 @@ public:
 	VideoDevice();
 	unsigned char *capture();
 	void prepareCapture();
+	void YUVtoBGR(unsigned char *dst);
 };
 
