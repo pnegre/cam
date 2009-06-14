@@ -2,13 +2,13 @@
 # macros
 #
 # GLUT_LDFLAG	= -L/usr/X11R6/lib -lglut -lGL -lGLU
-LDFLAGS 	= $(GLUT_LDFLAG) -lm 
+LDFLAGS 	= $(GLUT_LDFLAG) -lm  -L/usr/lib -lSDL
 
-GLUT_INCFLAG	= -I/usr/X11R6/include
-INCFLAGS	= $(GLUT_INCFLAG)
+GLUT_INCFLAG	= -I/usr/X11R6/include -I/usr/include/SDL
+INCFLAGS	= $(GLUT_INCFLAG) 
 
 CC		= gcc	
-CFLAGS		= -O
+CFLAGS		= -O  -D_GNU_SOURCE=1 -D_REENTRANT
 
 SRCS		= main.c capture_v4l.c
 HDRS		= show_video_v4l.h

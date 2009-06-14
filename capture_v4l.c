@@ -194,6 +194,7 @@ void CaptureV4LDisplayPictureInfo( struct video_picture vp )
 	  break;
 
         default:
+			fprintf( stdout , "Palette: %d\n", vp.palette );
 	  break;  
 
     }
