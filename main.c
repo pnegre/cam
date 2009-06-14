@@ -49,9 +49,15 @@ void pixel(SDL_Surface *s, int x, int y, int r, int g, int b)
 void yuv_to_rgb(int y, int u, int v, int *r, int *g, int *b)
 {
 	static float R,G,B;
-	B = 1.164*(y - 16)                   + 2.018*(u - 128);
-	G = 1.164*(y - 16) - 0.813*(v - 128) - 0.391*(u - 128);
-	R = 1.164*(y - 16) + 1.596*(v - 128);
+	B = 1.164*((float)y - 16.0)                            + 2.018*((float)u - 128.0);
+	G = 1.164*((float)y - 16.0) - 0.813*((float)v - 128.0) - 0.391*((float)u - 128.0);
+	R = 1.164*((float)y - 16.0) + 1.596*((float)v - 128.0);
+	if (R>255) R = 255;
+	if (G>255) G = 255;
+	if (B>255) B = 255;
+	if (R<0)   R = 0;
+	if (G<0)   G = 0;
+	if (B<0)   B = 0;
 	*r = (int) R;
 	*g = (int) G;
 	*b = (int) B;
@@ -62,17 +68,18 @@ void show_image(SDL_Surface *s)
 {
 	int x;
 	int y;
-	unsigned char *buf;
+	unsigned char *buf, *uu, *vv;
 	static int r,g,b;
 	
 	CaptureV4LDoubleBufferingCaptureWait(fd, &vmap);
 	buf = CaptureV4LGetImage(vmap,vm);
-// 	buf += 640*480;
+ 	uu = buf + 640*480;
+	vv = uu + 320*240;
 	
 	for(y=0;y<480;y++)
 		for(x=0;x<640;x++)
 		{
-			yuv_to_rgb( *buf, 20, 60, &r, &g, &b);
+			yuv_to_rgb( *buf, uu[x/2 + (y/2)*320], vv[x/2 + (y/2)*320], &r, &g, &b);
 			pixel(s, x,y, r,g,b);
 			buf += 1;
 		}
