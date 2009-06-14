@@ -15,9 +15,9 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 
-#include <asm/types.h>          /* for videodev2.h */
+// #include <asm/types.h>          /* for videodev2.h */
 
-#include <linux/videodev2.h>
+#include <linux/videodev.h>
 
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
@@ -48,31 +48,37 @@ void die( char *m )
 
 void init1()
 {
-	struct v4l2_capability cap;
-	struct v4l2_format fmt;
+	struct video_capability cap;
+	struct video_picture pic;
+// 	struct video_format fmt;
 	int bufsize;
 	int min;
 
-	fd = open (dev, O_RDWR /* required */ | O_NONBLOCK, 0);
+	if ((fd = open (dev, O_RDONLY, 0)) < 0)
+		die("CAN'T OPEN");
 
-	xioctl(fd, VIDIOC_QUERYCAP, &cap);
+	xioctl(fd, VIDIOCGCAP, &cap);
 
-	if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
-		die("NO CAP_VIDEO_CAPTURE");
+// 	if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
+// 		die("NO CAP_VIDEO_CAPTURE");
+// 	
+// 	if (!(cap.capabilities & V4L2_CAP_READWRITE))
+// 		die("NO CAP_READWRITE");
+// 	
+// 	if (!(cap.capabilities & V4L2_CAP_STREAMING))
+// 		die("NO CAP_STREAMING");
 	
-	if (!(cap.capabilities & V4L2_CAP_READWRITE))
-		die("NO CAP_READWRITE");
+	printf("mwidth %d\n",cap.maxwidth);
+	die("ei");
 	
-	if (!(cap.capabilities & V4L2_CAP_STREAMING))
-		die("NO CAP_STREAMING");
-
+/*
 	CLEAR (fmt);
 
 	fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	fmt.fmt.pix.width       = 640;
 	fmt.fmt.pix.height      = 480;
-	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB24;
-	fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
+	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YVU420;
+	fmt.fmt.pix.field       = V4L2_FIELD_ANY;
 
 	if (-1 == xioctl (fd, VIDIOC_S_FMT, &fmt))
 		die("NO FMT");
@@ -89,33 +95,33 @@ void init1()
 
 	buffers = calloc (1, sizeof (*buffers));
 	buffers[0].length = bufsize;
-	buffers[0].start = malloc (bufsize);
+	buffers[0].start = malloc (bufsize);*/
 }
 
-int read_frame()
-{
-	if (-1 == read (fd, buffers[0].start, buffers[0].length))
-	{
-		switch (errno)
-		{
-			case EAGAIN:
-				return 0;
-				break;
-			default:
-				die("READ ERROR\n");
-				break;
-		}
-	}
-	return 1;
-
-}
-
-void shutdown_cam()
-{
-	free(buffers[0].start);
-	free(buffers);
-	close(fd);
-}
+// int read_frame()
+// {
+// 	if (-1 == read (fd, buffers[0].start, buffers[0].length))
+// 	{
+// 		switch (errno)
+// 		{
+// 			case EAGAIN:
+// 				return 0;
+// 				break;
+// 			default:
+// 				die("READ ERROR\n");
+// 				break;
+// 		}
+// 	}
+// 	return 1;
+// 
+// }
+// 
+// void shutdown_cam()
+// {
+// 	free(buffers[0].start);
+// 	free(buffers);
+// 	close(fd);
+// }
 
 
 int main()
@@ -123,10 +129,10 @@ int main()
 	int i;
 	init1();
 
-	for (i=0; i<100; i++)
-	{
-		if (read_frame() == 1) { printf("."); }
-	}
-	printf("\n");
-	shutdown_cam();
+// 	for (i=0; i<100; i++)
+// 	{
+// 		if (read_frame() == 1) { printf("."); }
+// 	}
+// 	printf("\n");
+// 	shutdown_cam();
 }
