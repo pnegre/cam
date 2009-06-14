@@ -342,6 +342,13 @@ unsigned char *CaptureV4LSetImage( struct video_mmap vmap , struct video_mbuf vm
 
 }
 
+
+unsigned char *CaptureV4LGetImage( struct video_mmap vmap , struct video_mbuf vm )
+{
+    return frame_buf+vm.offsets[vmap.frame];
+}
+
+
 void CaptureV4LSetImageDownSamplingForOpenGL( struct video_mmap vmap , struct video_mbuf vm , int down_sampling_rate , unsigned char *image , unsigned char *disp_image )
 {
 

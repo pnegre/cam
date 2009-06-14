@@ -28,9 +28,9 @@ void prep_capture()
 	
 	CaptureV4LMemoryMapping( fd , vm );
 	
-	vmap.width = 640;
-    vmap.height = 480;
-    vmap.format = VIDEO_PALETTE_YUV420P;
+	vmap.width = CAPTURE_IMAGE_WIDTH;
+    vmap.height = CAPTURE_IMAGE_HEIGHT;
+    vmap.format = VIDEO_PALETTE_RGB24;
 	
 	if (CaptureV4LDoubleBufferingInitCapture(fd, &vmap) == -1)
 		printf("WAARNNNNNNNNNING\n");
@@ -53,19 +53,16 @@ void show_image(SDL_Surface *s)
 	unsigned char *buf;
 	
 	CaptureV4LDoubleBufferingCaptureWait(fd, &vmap);
-	buf = CaptureV4LSetImage(vmap,vm);
+	buf = CaptureV4LGetImage(vmap,vm);
 	
-	for(y=0;y<100;y++)
+	for(y=0;y<480;y++)
 		for(x=0;x<640;x++)
 		{
-			pixel(s,x,y,*buf, *(buf+1), *(buf+2));
-			buf += 3;
+			pixel(s,x,y,*buf, *(buf), *(buf));
+			buf += 1;
 		}
 	
-	if( CaptureV4LDoubleBufferingCaptureNextFrame( fd , &vmap ) == -1 ) {
-		fprintf( stderr , "COuld not capture next frame.\n" );
-		exit(-1);
-    }
+	CaptureV4LDoubleBufferingCaptureNextFrame( fd , &vmap );
 }
 
 int main ( void )
