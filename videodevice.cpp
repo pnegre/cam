@@ -74,7 +74,7 @@ void VideoDevice::YUVtoBGR(unsigned char *dst)
 	for(y=0;y<h;y++)
 		for(x=0;x<w;x++)
 		{
-			yuv_to_rgb( *buf, uu[x/2 + (y/2)*320], vv[x/2 + (y/2)*320], r,g,b);
+			yuv_to_rgb( *buf, uu[x/2 + (y/2)*w/2], vv[x/2 + (y/2)*w/2], r,g,b);
 			*dst++ = b;
 			*dst++ = g;
 			*dst++ = r;
