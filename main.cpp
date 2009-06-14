@@ -6,17 +6,7 @@
 #define SC_H 480
 
 
-VideoDevice vdev(SC_W,SC_H);
 
-
-
-void show_image(SDL_Surface *fr, SDL_Surface *s)
-{
-	vdev.capture();
-	vdev.YUVtoBGR((unsigned char*)fr->pixels);
-	SDL_BlitSurface(fr,NULL,s,NULL);
-	vdev.prepareCapture();
-}
 
 
 int main ( void )
@@ -25,6 +15,8 @@ int main ( void )
     Uint8 *k;
     SDL_Event e;
 	Uint32 black_color;
+	
+	VideoDevice vdev(SC_W,SC_H);
 	
 	SDL_Init(SDL_INIT_VIDEO);
 	s = SDL_SetVideoMode(SC_W,SC_H,0,SDL_HWSURFACE);
@@ -39,7 +31,11 @@ int main ( void )
 		if (k[SDLK_ESCAPE]) break;
 		SDL_UpdateRect(s,0,0,0,0);
 		SDL_FillRect(s,0,black_color);
-		show_image(fr,s);
+		
+		vdev.capture();
+		vdev.YUVtoBGR((unsigned char*)fr->pixels);
+		SDL_BlitSurface(fr,NULL,s,NULL);
+		vdev.prepareCapture();
 		
 		SDL_Delay(50);
 

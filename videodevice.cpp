@@ -16,11 +16,6 @@ VideoDevice::VideoDevice(int width, int height)
 	CaptureV4LGetMemoryMapInfo( fd , &vm );
 	CaptureV4LDisplayMemoryMapInfo(vm);
 	
-	if( CaptureV4LSelectChannel( fd , vch , 0 ) == -1 ) {
-		fprintf( stderr , "Could not select channel.\n" );
-		exit(-1);
-	}
-	
 	CaptureV4LMemoryMapping( fd , vm );
 	
 	vmap.width = width;
