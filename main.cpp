@@ -1,4 +1,6 @@
 #include <SDL.h>
+#include <opencv/cv.h>
+#include "highgui.h"
 
 #include "videodevice.h"
 
@@ -20,6 +22,8 @@ int main ( void )
 	black_color = SDL_MapRGB(s->format,0,0,0);
 	
 	fr = SDL_CreateRGBSurface(SDL_HWSURFACE, SC_W,SC_H, 24,0,0,0,0);
+	
+// 	IplImage * im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
 	
 	while(1)
 	{

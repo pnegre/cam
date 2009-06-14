@@ -18,7 +18,7 @@ env = conf.Finish()
  
  
 libs = (
-	['sdl',]
+	['sdl','opencv']
 )
  
 for l in libs:
