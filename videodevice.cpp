@@ -7,39 +7,39 @@ VideoDevice::VideoDevice(int width, int height)
 	struct video_picture vp;
 	struct video_channel vch[MAX_NO_CHANNEL];
 	
-	fd = CaptureV4LOpen( (char*) DEFAULT_DEVICE_NAME );
-	CaptureV4LGetDeviceCapability(fd, &vcap);
-	CaptureV4LDisplayDeviceCapability(vcap);
-	CaptureV4LGetPictureInfo(fd, &vp);
-	CaptureV4LDisplayPictureInfo(vp);
+	fd = C4L::CaptureV4LOpen( (char*) DEFAULT_DEVICE_NAME );
+	C4L::CaptureV4LGetDeviceCapability(fd, &vcap);
+	C4L::CaptureV4LDisplayDeviceCapability(vcap);
+	C4L::CaptureV4LGetPictureInfo(fd, &vp);
+	C4L::CaptureV4LDisplayPictureInfo(vp);
 	
-	CaptureV4LGetMemoryMapInfo( fd , &vm );
-	CaptureV4LDisplayMemoryMapInfo(vm);
+	C4L::CaptureV4LGetMemoryMapInfo( fd , &vm );
+	C4L::CaptureV4LDisplayMemoryMapInfo(vm);
 	
-	CaptureV4LMemoryMapping( fd , vm );
+	C4L::CaptureV4LMemoryMapping( fd , vm );
 	
 	vmap.width = width;
 	vmap.height = height;
 	vmap.format = VIDEO_PALETTE_YUV420P;
 	
-	if (CaptureV4LDoubleBufferingInitCapture(fd, &vmap) == -1)
+	if (C4L::CaptureV4LDoubleBufferingInitCapture(fd, &vmap) == -1)
 		printf("WAARNNNNNNNNNING\n");
 }
 
 void VideoDevice::capture()
 {
-	CaptureV4LDoubleBufferingCaptureWait(fd, &vmap);
+	C4L::CaptureV4LDoubleBufferingCaptureWait(fd, &vmap);
 }
 
 // Torna els píxels en RAW (en el format que la càmera té configurat)
 unsigned char *VideoDevice::raw()
 {
-	return CaptureV4LGetImage(vmap,vm);
+	return C4L::CaptureV4LGetImage(vmap,vm);
 }
 	
 void VideoDevice::prepareCapture()
 {
-	CaptureV4LDoubleBufferingCaptureNextFrame( fd , &vmap );
+	C4L::CaptureV4LDoubleBufferingCaptureNextFrame( fd , &vmap );
 }
 
 static void yuv_to_rgb(int y, int u, int v, int &r, int &g, int &b)
@@ -67,7 +67,7 @@ void VideoDevice::YUVtoBGR(unsigned char *dst)
 	int w = vmap.width;
 	int h = vmap.height;
 	
-	buf = CaptureV4LGetImage(vmap,vm);
+	buf = C4L::CaptureV4LGetImage(vmap,vm);
 	uu = buf + h*w;
 	vv = uu + h*w/4;
 	

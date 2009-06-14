@@ -6,9 +6,6 @@
 #define SC_H 480
 
 
-
-
-
 int main ( void )
 {
 	SDL_Surface *s, *fr;

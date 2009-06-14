@@ -39,6 +39,10 @@
 #define IMAGE_WIDTH_DS		CAPTURE_IMAGE_WIDTH/DOWN_SAMPLING_RATE 	/* image size after down sampling */
 #define IMAGE_HEIGHT_DS		CAPTURE_IMAGE_HEIGHT/DOWN_SAMPLING_RATE
 
+namespace C4L
+{
+
+
 /*=====================================================
   Function Prototypes
 =====================================================*/
@@ -64,4 +68,4 @@ unsigned char *CaptureV4LSetImage( struct video_mmap vmap , struct video_mbuf vm
 unsigned char *CaptureV4LGetImage( struct video_mmap vmap , struct video_mbuf vm );
 void CaptureV4LSetImageDownSamplingForOpenGL( struct video_mmap vmap , struct video_mbuf vm , int down_sampling_rate , unsigned char *image , unsigned char *disp_image );
 
-
+};

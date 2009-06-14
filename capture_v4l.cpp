@@ -6,6 +6,9 @@
 
 #include "capture_v4l.h"
 
+namespace C4L
+{
+
 /*=== Global variable for this module ===*/
 static unsigned char *frame_buf;
 
@@ -375,5 +378,7 @@ void CaptureV4LSetImageDownSamplingForOpenGL( struct video_mmap vmap , struct vi
 	}
 	pixel_pos += vmap.width*RGB*(down_sampling_rate-1);
     }
+
+}
 
 }
