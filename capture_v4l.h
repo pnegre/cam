@@ -61,6 +61,7 @@ int CaptureV4LDoubleBufferingCaptureWait( int fd , struct video_mmap *vmap ) ;
 int CaptureV4LDoubleBufferingCaptureNextFrame( int fd , struct video_mmap *vmap );
 
 unsigned char *CaptureV4LSetImage( struct video_mmap vmap , struct video_mbuf vm );
+unsigned char *CaptureV4LGetImage( struct video_mmap vmap , struct video_mbuf vm );
 void CaptureV4LSetImageDownSamplingForOpenGL( struct video_mmap vmap , struct video_mbuf vm , int down_sampling_rate , unsigned char *image , unsigned char *disp_image );
 
 

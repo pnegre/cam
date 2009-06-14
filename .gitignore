@@ -1,0 +1,4 @@
+.scon*
+*.o
+cam
+config.log

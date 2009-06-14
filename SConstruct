@@ -25,4 +25,4 @@ for l in libs:
   env.ParseConfig('pkg-config ' + l + ' --cflags --libs')
  
  
-env.Program('cam', Glob('*.c'))
+env.Program('cam', Glob('*.c*'))
