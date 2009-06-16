@@ -39,6 +39,7 @@ int main ( void )
 // 	fr = SDL_CreateRGBSurface(SDL_HWSURFACE, SC_W,SC_H, 24,0,0,0,0);
 	
 	IplImage * im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
+	IplImage * im2 = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
 	SDL_Surface *fr;
 	while(1)
 	{
@@ -50,7 +51,8 @@ int main ( void )
 		
 		vdev.capture();
 		vdev.YUVtoBGR((unsigned char*)im->imageData);
-		fr = cvToSdl(im);
+		cvSmooth(im,im2, CV_GAUSSIAN, 7,7);
+		fr = cvToSdl(im2);
 		SDL_BlitSurface(fr,NULL,s,NULL);
 		SDL_FreeSurface(fr);
 		vdev.prepareCapture();
