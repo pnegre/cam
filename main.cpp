@@ -8,9 +8,24 @@
 #define SC_H 480
 
 
+
+SDL_Surface *cvToSdl(IplImage *opencvimg)
+{
+	SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((void*)opencvimg->imageData,
+		opencvimg->width,
+		opencvimg->height,
+		opencvimg->depth*opencvimg->nChannels,
+		opencvimg->widthStep,
+		0xff0000, 0x00ff00, 0x0000ff, 0
+		);
+	return surface;
+}
+
+
+
 int main ( void )
 {
-	SDL_Surface *s, *fr;
+	SDL_Surface *s;
     Uint8 *k;
     SDL_Event e;
 	Uint32 black_color;
@@ -21,10 +36,10 @@ int main ( void )
 	s = SDL_SetVideoMode(SC_W,SC_H,0,SDL_HWSURFACE);
 	black_color = SDL_MapRGB(s->format,0,0,0);
 	
-	fr = SDL_CreateRGBSurface(SDL_HWSURFACE, SC_W,SC_H, 24,0,0,0,0);
+// 	fr = SDL_CreateRGBSurface(SDL_HWSURFACE, SC_W,SC_H, 24,0,0,0,0);
 	
-// 	IplImage * im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
-	
+	IplImage * im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
+	SDL_Surface *fr;
 	while(1)
 	{
 	 	SDL_PollEvent(&e);
@@ -34,8 +49,10 @@ int main ( void )
 		SDL_FillRect(s,0,black_color);
 		
 		vdev.capture();
-		vdev.YUVtoBGR((unsigned char*)fr->pixels);
+		vdev.YUVtoBGR((unsigned char*)im->imageData);
+		fr = cvToSdl(im);
 		SDL_BlitSurface(fr,NULL,s,NULL);
+		SDL_FreeSurface(fr);
 		vdev.prepareCapture();
 		
 		SDL_Delay(50);
