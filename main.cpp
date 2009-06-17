@@ -21,6 +21,33 @@ SDL_Surface *cvToSdl(IplImage *opencvimg)
 	return surface;
 }
 
+class Processor
+{
+protected:
+	IplImage *im;
+	int w,h;
+	VideoDevice *vdev;
+
+public:
+	Processor()
+	{
+		im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
+		vdev = new VideoDevice(SC_W,SC_H);
+	}
+	
+	SDL_Surface *doit()
+	{
+		vdev->capture();
+		vdev->YUVtoBGR((unsigned char*)im->imageData);
+		cvSmooth(im,im, CV_GAUSSIAN, 7,7);
+		vdev->prepareCapture();
+		return cvToSdl(im);
+	}
+};
+
+
+
+
 
 
 int main ( void )
@@ -30,17 +57,12 @@ int main ( void )
     SDL_Event e;
 	Uint32 black_color;
 	
-	VideoDevice vdev(SC_W,SC_H);
-	
 	SDL_Init(SDL_INIT_VIDEO);
 	s = SDL_SetVideoMode(SC_W,SC_H,0,SDL_HWSURFACE);
 	black_color = SDL_MapRGB(s->format,0,0,0);
 	
-// 	fr = SDL_CreateRGBSurface(SDL_HWSURFACE, SC_W,SC_H, 24,0,0,0,0);
-	
-	IplImage * im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
-	IplImage * im2 = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
 	SDL_Surface *fr;
+	Processor proc;
 	while(1)
 	{
 	 	SDL_PollEvent(&e);
@@ -49,13 +71,10 @@ int main ( void )
 		SDL_UpdateRect(s,0,0,0,0);
 		SDL_FillRect(s,0,black_color);
 		
-		vdev.capture();
-		vdev.YUVtoBGR((unsigned char*)im->imageData);
-		cvSmooth(im,im2, CV_GAUSSIAN, 7,7);
-		fr = cvToSdl(im2);
+		fr = proc.doit();
+		
 		SDL_BlitSurface(fr,NULL,s,NULL);
 		SDL_FreeSurface(fr);
-		vdev.prepareCapture();
 		
 		SDL_Delay(50);
 

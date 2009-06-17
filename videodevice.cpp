@@ -82,5 +82,17 @@ void VideoDevice::YUVtoBGR(unsigned char *dst)
 		}
 }
 
+void VideoDevice::getGray(unsigned char *dst)
+{
+	int x,y;
+	unsigned char *buf = C4L::CaptureV4LGetImage(vmap,vm);
+	int w = vmap.width;
+	int h = vmap.height;
+	
+	for(y=0;y<h;y++)
+		for(x=0;x<w;x++)
+			*dst++ = *buf++;
+}
+
 
 

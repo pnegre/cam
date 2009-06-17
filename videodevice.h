@@ -15,6 +15,7 @@ public:
 	VideoDevice(int width, int height);
 	void capture();
 	unsigned char *raw();
+	void getGray(unsigned char *dst);
 	void prepareCapture();
 	void YUVtoBGR(unsigned char *dst);
 };
