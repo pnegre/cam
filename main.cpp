@@ -29,15 +29,16 @@ protected:
 	IplImage *im, *red, *green, *blue;
 	int w,h;
 	VideoDevice *vdev;
+	CvHaarClassifierCascade* cascade;
+	CvMemStorage* storage;
 
 public:
 	Processor()
 	{
 		im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
 		vdev = new VideoDevice(SC_W,SC_H);
-		red = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 1 );
-		green = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 1 );
-		blue = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 1 );
+		cascade = (CvHaarClassifierCascade*)cvLoad( "xml/haarcascade_frontalface_alt.xml", 0, 0, 0 );
+		storage = cvCreateMemStorage(0);
 	}
 	
 	SDL_Surface *doit()
@@ -45,14 +46,31 @@ public:
 		vdev->capture();
 		vdev->YUVtoBGR((unsigned char*)im->imageData);
 		
+// 		IplImage *fr = cvCreateImage( cvSize(im->width,im->height),
+// 			IPL_DEPTH_8U, im->nChannels );
+// 		cvCopy(im,fr,0);
 		
-// 		cvSplit(im,blue,green,red,0);
-// 		cvFloodFill(red,cvPoint(290,100),cvScalar(250),cvScalar(4),cvScalar(2),NULL,4,NULL);
-// 		cvAdaptiveThreshold(green,red,200,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,3,5);
-// 		cvErode(red,red,NULL,2);
-// 		cvCanny(blue,red,9/*0,80,3);
-// 		cvMerge(red,red,red,0,im);
-// 		cvRectangle(im,cvPoint(285,95),cvPoint(295,105),cvScalar(255*/),1,8,0);
+		cvClearMemStorage( storage );
+		CvSeq* faces = cvHaarDetectObjects( im, cascade, storage,
+			1.1, 2, CV_HAAR_DO_CANNY_PRUNING,
+			cvSize(40, 40) );
+		
+		CvPoint pt1, pt2;
+		for( int i = 0; i < (faces ? faces->total : 0); i++ )
+        {
+			// Create a new rectangle for drawing the face
+            CvRect* r = (CvRect*)cvGetSeqElem( faces, i );
+			
+			// Find the dimensions of the face,and scale it if necessary
+			pt1.x = r->x;
+			pt2.x = (r->x+r->width);
+			pt1.y = r->y;
+			pt2.y = (r->y+r->height);
+
+			// Draw the rectangle in the input image
+			cvRectangle( im, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
+
+		}
 		
 		vdev->prepareCapture();
 		return cvToSdl(im);
@@ -89,9 +107,6 @@ int main ( void )
 		
 		SDL_BlitSurface(fr,NULL,s,NULL);
 		SDL_FreeSurface(fr);
-		
-		SDL_Delay(50);
-
 	}
 
 	exit(0);
