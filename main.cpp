@@ -37,7 +37,7 @@ public:
 	{
 		im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
 		vdev = new VideoDevice(SC_W,SC_H);
-		cascade = (CvHaarClassifierCascade*)cvLoad( "xml/haarcascade_frontalface_alt.xml", 0, 0, 0 );
+		cascade = (CvHaarClassifierCascade*)cvLoad( "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml", 0, 0, 0 );
 		storage = cvCreateMemStorage(0);
 	}
 	
