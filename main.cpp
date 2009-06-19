@@ -26,18 +26,19 @@ SDL_Surface *cvToSdl(IplImage *opencvimg)
 class Processor
 {
 protected:
-	IplImage *im, *red, *green, *blue;
+	IplImage *im, *res;
 	int w,h;
 	VideoDevice *vdev;
+	CvMemStorage* storage;
+	CvSeq *contour;
 
 public:
 	Processor()
 	{
 		im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
+		res = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 1 );
 		vdev = new VideoDevice(SC_W,SC_H);
-		red = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 1 );
-		green = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 1 );
-		blue = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 1 );
+		storage = cvCreateMemStorage(0);
 	}
 	
 	SDL_Surface *doit()
@@ -45,14 +46,39 @@ public:
 		vdev->capture();
 		vdev->YUVtoBGR((unsigned char*)im->imageData);
 		
+		int i,j;
+		int r,g,b;
+		unsigned char *buf = (unsigned char*)im->imageData;
+		unsigned char *dstbuf = (unsigned char*) res->imageData;
+		for(i=0;i<SC_W;i++)
+			for(j=0;j<SC_H;j++)
+			{
+				b = *buf++; g = *buf++; r = *buf++;
+				if ((r > b+90) && (r > g+90))
+					*dstbuf++ = 255;
+				else
+					*dstbuf++ = 0;
+			}
+
+		cvErode(res,res,NULL,2);
+		cvDilate(res,res,NULL,2); 
 		
-// 		cvSplit(im,blue,green,red,0);
-// 		cvFloodFill(red,cvPoint(290,100),cvScalar(250),cvScalar(4),cvScalar(2),NULL,4,NULL);
-// 		cvAdaptiveThreshold(green,red,200,CV_ADAPTIVE_THRESH_MEAN_C,CV_THRESH_BINARY,3,5);
-// 		cvErode(red,red,NULL,2);
-// 		cvCanny(blue,red,9/*0,80,3);
-// 		cvMerge(red,red,red,0,im);
-// 		cvRectangle(im,cvPoint(285,95),cvPoint(295,105),cvScalar(255*/),1,8,0);
+		cvClearMemStorage( storage );
+		
+		cvFindContours( res, storage, &contour, sizeof(CvContour), CV_RETR_LIST, CV_CHAIN_APPROX_NONE );
+		for( ; contour != 0; contour = contour->h_next )
+		{
+			CvPoint pt1,pt2;
+			CvRect r = cvContourBoundingRect(contour,1);
+			pt1.x=r.x;
+			pt1.y=r.y;
+			pt2.x=r.x+r.width;
+			pt2.y=r.y+r.height;
+			if ((r.width>20) && (r.height>10))
+				cvRectangle(im,pt1,pt2,CV_RGB( 255, 0, 0 ),1);
+		}
+		
+// 		cvMerge(res,res,res,0,im);
 		
 		vdev->prepareCapture();
 		return cvToSdl(im);
@@ -89,8 +115,6 @@ int main ( void )
 		
 		SDL_BlitSurface(fr,NULL,s,NULL);
 		SDL_FreeSurface(fr);
-		
-		SDL_Delay(50);
 
 	}
 
