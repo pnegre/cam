@@ -10,8 +10,8 @@
 #define SC_W 640
 #define SC_H 480
 
-char *CLASSIFIER_FILENAME = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
-
+const char *CLASSIFIER_FILENAME = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
+const char *DESTINATION_PHOTO   = "/tmp/image.jpg";
 
 
 SDL_Surface *cvToSdl(IplImage *opencvimg)
@@ -31,8 +31,7 @@ SDL_Surface *cvToSdl(IplImage *opencvimg)
 class Processor
 {
 protected:
-	IplImage *im, *red, *green, *blue;
-	int w,h;
+	IplImage *im;
 	VideoDevice *vdev;
 	CvHaarClassifierCascade* cascade;
 	CvMemStorage* storage;
@@ -63,7 +62,7 @@ public:
 		cvCopy(image,subRect,NULL);
 		cvResetImageROI(image);
 		photo = cvToSdl(subRect);
-		cvSaveImage("/tmp/image.jpg",subRect);
+		cvSaveImage(DESTINATION_PHOTO, subRect);
 		cvReleaseImage(&subRect);
 	}
 	
