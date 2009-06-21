@@ -63,12 +63,12 @@ public:
 			
 	}
 	
-	void takePhoto(IplImage *image)
+	void takePhoto()
 	{
 		IplImage *subRect = cvCreateImage( cvSize(photoRect.width,photoRect.height), IPL_DEPTH_8U, 3 );
-		cvSetImageROI(image,photoRect);
-		cvCopy(image,subRect,NULL);
-		cvResetImageROI(image);
+		cvSetImageROI(im,photoRect);
+		cvCopy(im,subRect,NULL);
+		cvResetImageROI(im);
 		photo = cvToSdl(subRect);
 		cvSaveImage(DESTINATION_PHOTO, subRect);
 		cvReleaseImage(&subRect);
@@ -105,7 +105,7 @@ public:
 		vw = sqrt(vw);
 		vh = sqrt(vh);
 		
-// 		printf("%f %f %f %f\n",vx,vy,vw,vh);
+		// Low variance?
 		if ((vx < 3.0) and (vy < 3.0) and (vw < 3.0) and (vh < 3.0))
 		{
 			photoRect.x = mx-mx*0.1;
@@ -131,6 +131,7 @@ public:
 			{
 				printf("OK, PHOTO!!\n");
 				goodPhoto = true;
+				takePhoto();
 			}
 			
 			rects.pop_front();
@@ -162,8 +163,6 @@ public:
 			pt2.y = (r->y+r->height);
 			
 			inData(*r);
-			if (goodPhoto)
-				takePhoto(im);
 			
 			// Draw the rectangle in the input image
 			cvRectangle( im, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
