@@ -1,3 +1,4 @@
+#include <deque>
 #include <SDL.h>
 #include <opencv/cv.h>
 #include "highgui.h"
@@ -6,6 +7,8 @@
 
 #define SC_W 640
 #define SC_H 480
+
+char *CLASSIFIER_FILENAME = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
 
 
 
@@ -31,14 +34,43 @@ protected:
 	VideoDevice *vdev;
 	CvHaarClassifierCascade* cascade;
 	CvMemStorage* storage;
+	
+	std::deque<CvRect> rects;
 
 public:
 	Processor()
 	{
 		im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
 		vdev = new VideoDevice(SC_W,SC_H);
-		cascade = (CvHaarClassifierCascade*)cvLoad( "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml", 0, 0, 0 );
+		cascade = (CvHaarClassifierCascade*)cvLoad( CLASSIFIER_FILENAME, 0, 0, 0 );
 		storage = cvCreateMemStorage(0);
+	}
+	
+	
+	void doCalculations()
+	{
+		CvRect r;
+		int x=0, y=0, w=0 ,h=0;
+		
+		for(std::deque<CvRect>::iterator i=rects.begin(); i != rects.end(); i++)
+		{
+			r = *i;
+			printf("%d %d %d %d\n", r.x, r.y, r.width, r.height);
+		}
+	}
+	
+	
+	void inData(CvRect r)
+	{
+		int sz = rects.size();
+		if (sz > 10)
+		{
+			// Calcular mitjanes i variances
+			doCalculations();			
+			rects.pop_front();
+		}
+		
+		rects.push_back(r);
 	}
 	
 	SDL_Surface *doit()
@@ -53,7 +85,7 @@ public:
 		cvClearMemStorage( storage );
 		CvSeq* faces = cvHaarDetectObjects( im, cascade, storage,
 			1.1, 2, CV_HAAR_DO_CANNY_PRUNING,
-			cvSize(40, 40) );
+			cvSize(150, 150) );
 		
 		CvPoint pt1, pt2;
 		for( int i = 0; i < (faces ? faces->total : 0); i++ )
@@ -69,7 +101,9 @@ public:
 
 			// Draw the rectangle in the input image
 			cvRectangle( im, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
-
+			
+			inData(*r);
+			break;
 		}
 		
 		vdev->prepareCapture();
@@ -101,7 +135,7 @@ int main ( void )
 		k = SDL_GetKeyState(NULL);
 		if (k[SDLK_ESCAPE]) break;
 		SDL_UpdateRect(s,0,0,0,0);
-		SDL_FillRect(s,0,black_color);
+// 		SDL_FillRect(s,0,black_color);
 		
 		fr = proc.doit();
 		
