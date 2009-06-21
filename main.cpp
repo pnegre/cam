@@ -63,6 +63,7 @@ public:
 		cvCopy(image,subRect,NULL);
 		cvResetImageROI(image);
 		photo = cvToSdl(subRect);
+		cvSaveImage("/tmp/image.jpg",subRect);
 		cvReleaseImage(&subRect);
 	}
 	
