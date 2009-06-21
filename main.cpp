@@ -1,4 +1,6 @@
 #include <deque>
+#include <math.h>
+
 #include <SDL.h>
 #include <opencv/cv.h>
 #include "highgui.h"
@@ -38,35 +40,91 @@ protected:
 	std::deque<CvRect> rects;
 
 public:
+	
+	bool goodPhoto;
+	CvRect photoRect;
+	SDL_Surface *photo;
+	
 	Processor()
 	{
 		im = cvCreateImage( cvSize(SC_W,SC_H), IPL_DEPTH_8U, 3 );
 		vdev = new VideoDevice(SC_W,SC_H);
 		cascade = (CvHaarClassifierCascade*)cvLoad( CLASSIFIER_FILENAME, 0, 0, 0 );
 		storage = cvCreateMemStorage(0);
+		goodPhoto = false;
+		photo = NULL;
 	}
 	
 	
-	void doCalculations()
+	void takePhoto(IplImage *image)
+	{
+		IplImage *subRect = cvCreateImage( cvSize(photoRect.width,photoRect.height), IPL_DEPTH_8U, 3 );
+		cvSetImageROI(image,photoRect);
+		cvCopy(image,subRect,NULL);
+		cvResetImageROI(image);
+		photo = cvToSdl(subRect);
+		cvReleaseImage(&subRect);
+	}
+	
+	
+	bool isDataAccurate()
 	{
 		CvRect r;
-		int x=0, y=0, w=0 ,h=0;
+		float mx=0, my=0, mw=0, mh=0;
+		float sz = rects.size();
 		
 		for(std::deque<CvRect>::iterator i=rects.begin(); i != rects.end(); i++)
 		{
 			r = *i;
-			printf("%d %d %d %d\n", r.x, r.y, r.width, r.height);
+			mx+=r.x; my+=r.y; mw+=r.width; mh+=r.height;
 		}
+		
+		mx/=sz; my/=sz; mw/=sz; mh/=sz;
+		
+		float vx=0, vy=0, vw=0 ,vh=0;
+		for(std::deque<CvRect>::iterator i=rects.begin(); i != rects.end(); i++)
+		{
+			r = *i;
+			vx += pow(r.x      - mx, 2);
+			vy += pow(r.y      - my, 2);
+			vw += pow(r.width  - mw, 2);
+			vh += pow(r.height - mh, 2);
+		}
+		
+		vx/=sz; vy/=sz; vw/=sz; vh/=sz;
+		vx = sqrt(vx);
+		vy = sqrt(vy);
+		vw = sqrt(vw);
+		vh = sqrt(vh);
+		
+// 		printf("%f %f %f %f\n",vx,vy,vw,vh);
+		if ((vx < 3.0) and (vy < 3.0) and (vw < 3.0) and (vh < 3.0))
+		{
+			photoRect.x = mx-mx*0.1;
+			photoRect.y = my-my*0.1;
+			photoRect.width  = mw + mw*0.2;
+			photoRect.height = mh + mh*0.2;
+			return true;
+		}
+		return false;
+		
 	}
 	
 	
 	void inData(CvRect r)
 	{
 		int sz = rects.size();
-		if (sz > 10)
+		
+		goodPhoto = false;
+		
+		if (sz >= 20)
 		{
-			// Calcular mitjanes i variances
-			doCalculations();			
+			if (isDataAccurate())
+			{
+				printf("OK, PHOTO!!\n");
+				goodPhoto = true;
+			}
+			
 			rects.pop_front();
 		}
 		
@@ -98,16 +156,24 @@ public:
 			pt2.x = (r->x+r->width);
 			pt1.y = r->y;
 			pt2.y = (r->y+r->height);
-
-			// Draw the rectangle in the input image
-			cvRectangle( im, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
 			
 			inData(*r);
+			if (goodPhoto)
+				takePhoto(im);
+			
+			// Draw the rectangle in the input image
+			cvRectangle( im, pt1, pt2, CV_RGB(255,0,0), 3, 8, 0 );
+				
 			break;
 		}
 		
 		vdev->prepareCapture();
 		return cvToSdl(im);
+	}
+	
+	void displayPhoto(SDL_Surface *s)
+	{
+		SDL_BlitSurface(photo,NULL,s,NULL);
 	}
 };
 
@@ -129,6 +195,7 @@ int main ( void )
 	
 	SDL_Surface *fr;
 	Processor proc;
+	int state = 1;
 	while(1)
 	{
 	 	SDL_PollEvent(&e);
@@ -137,10 +204,22 @@ int main ( void )
 		SDL_UpdateRect(s,0,0,0,0);
 // 		SDL_FillRect(s,0,black_color);
 		
-		fr = proc.doit();
+		if (state == 1)
+		{
+			fr = proc.doit();
+			if (proc.goodPhoto)
+				state = 2;
+			
+			SDL_BlitSurface(fr,NULL,s,NULL);
+			SDL_FreeSurface(fr);
+		}
+		else if (state == 2)
+		{
+			SDL_FillRect(s,0,black_color);
+			proc.displayPhoto(s);
+		}
 		
-		SDL_BlitSurface(fr,NULL,s,NULL);
-		SDL_FreeSurface(fr);
+		
 	}
 
 	exit(0);
