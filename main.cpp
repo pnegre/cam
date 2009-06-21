@@ -136,10 +136,6 @@ public:
 		vdev->capture();
 		vdev->YUVtoBGR((unsigned char*)im->imageData);
 		
-// 		IplImage *fr = cvCreateImage( cvSize(im->width,im->height),
-// 			IPL_DEPTH_8U, im->nChannels );
-// 		cvCopy(im,fr,0);
-		
 		cvClearMemStorage( storage );
 		CvSeq* faces = cvHaarDetectObjects( im, cascade, storage,
 			1.1, 2, CV_HAAR_DO_CANNY_PRUNING,
@@ -171,9 +167,9 @@ public:
 		return cvToSdl(im);
 	}
 	
-	void displayPhoto(SDL_Surface *s)
+	SDL_Surface *getPhoto()
 	{
-		SDL_BlitSurface(photo,NULL,s,NULL);
+		return photo;
 	}
 };
 
@@ -202,7 +198,6 @@ int main ( void )
 		k = SDL_GetKeyState(NULL);
 		if (k[SDLK_ESCAPE]) break;
 		SDL_UpdateRect(s,0,0,0,0);
-// 		SDL_FillRect(s,0,black_color);
 		
 		if (state == 1)
 		{
@@ -216,7 +211,13 @@ int main ( void )
 		else if (state == 2)
 		{
 			SDL_FillRect(s,0,black_color);
-			proc.displayPhoto(s);
+			SDL_BlitSurface(proc.getPhoto(), NULL, s, NULL);
+			if (k[SDLK_SPACE])
+			{
+				SDL_FreeSurface(proc.getPhoto());
+				proc.goodPhoto = false;
+				state = 1;
+			}
 		}
 		
 		
