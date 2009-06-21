@@ -54,6 +54,14 @@ public:
 		photo = NULL;
 	}
 	
+	void reset()
+	{
+		rects.clear();
+		if (photo)
+			SDL_FreeSurface(photo);
+		goodPhoto = false;
+			
+	}
 	
 	void takePhoto(IplImage *image)
 	{
@@ -214,8 +222,7 @@ int main ( void )
 			SDL_BlitSurface(proc.getPhoto(), NULL, s, NULL);
 			if (k[SDLK_SPACE])
 			{
-				SDL_FreeSurface(proc.getPhoto());
-				proc.goodPhoto = false;
+				proc.reset();
 				state = 1;
 			}
 		}
